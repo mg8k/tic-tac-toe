@@ -18,8 +18,11 @@ function gameBoard() {
 
     }
     const getBoard = () => board;
+    
     const pickSquare = (row,column,player) =>{
-        board[row][column].addChoice(player);
+        if(board[row][column].getValue() == ''){
+            board[row][column].addChoice(player);
+        }
         printBoard();
     }
     const checkWinner = () =>{
@@ -35,63 +38,75 @@ function gameBoard() {
         let playerOneDiaOpCounter= 0;
         let playerTwoDiaOpCounter= 0;
 
+        let drawState = true;
+
 
 
         for(let i = 0; i<rows; i++){
+
             playerOneRowCounter = 0;
             playerOneColCounter = 0;
 
             playerTwoRowCounter = 0;
             playerTwoColCounter = 0;
 
-            playerOneDiaOpCounter =0;
-            playerTwoDiaOpCounter =0;
-
             if(board[i][i].getValue() == "X"){
                     playerOneDiaCounter++;
-                    console.log('dia 2 counter: ', playerOneDiaCounter);
+                    // console.log('dia 2 counter: ', playerOneDiaCounter);
             }
             if(board[i][i].getValue() == "O"){
                     playerTwoDiaCounter++;
-                    console.log('dia 2 counter: ', playerTwoDiaCounter);
+                    // console.log('dia 2 counter: ', playerTwoDiaCounter);
             }
-            for(let j = rows-1; j > 0 ; j--){
-                if(board[i][j].getValue() == "X"){
-                    playerOneDiaOpCounter++;
-                    console.log('dia 2 p1 counter: ', playerOneDiaOpCounter);
-                }
-                if(board[i][j].getValue() == "O"){
-                    playerTwoDiaOpCounter++;
-                    console.log('dia 2 p2 counter: ', playerTwoDiaOpCounter);
-                }
+
+  
+            if(board[i][2-i].getValue() == "X"){
+                playerOneDiaOpCounter++;
+                // console.log('dia 2 p1 counter: ', playerOneDiaOpCounter);
             }
+            if(board[i][2-i].getValue() == "O"){
+                playerTwoDiaOpCounter++;
+                // console.log('dia 2 p2 counter: ', playerTwoDiaOpCounter);
+            }
+            
 
             for(let j =0; j< columns; j++){
 
                 if(board[i][j].getValue() == "X"){
                     playerOneRowCounter++;
-                    console.log('counter: ', playerOneRowCounter);
+                    // console.log('counter: ', playerOneRowCounter);
                 }
                 if(board[j][i].getValue() == "X"){
                     playerOneColCounter++;
-                    console.log('counter: ', playerOneColCounter);
+                    // console.log('counter: ', playerOneColCounter);
                 }
                 if(board[i][j].getValue() == "O"){
                     playerTwoRowCounter++;
-                    console.log('counter: ', playerTwoRowCounter);
+                    // console.log('counter: ', playerTwoRowCounter);
                 }
                 if(board[j][i].getValue() == "O"){
                     playerTwoColCounter++;
-                    console.log('counter: ', playerTwoColCounter);
+                    // console.log('counter: ', playerTwoColCounter);
                 }
+                if(board[i][j].getValue() == ''){
+                    drawState = false;
+                }
+
 
                 
             }
-                if(playerOneRowCounter == 3 || playerOneColCounter == 3 || playerTwoRowCounter == 3 || playerTwoColCounter == 3|| playerOneDiaCounter == 3){
-                    console.log("winner");
+                if(playerOneRowCounter == 3 || playerOneColCounter == 3 ||  playerOneDiaCounter == 3|| playerOneDiaOpCounter ==3){
+                    console.log("Player 1 is the winner");
+                    return;
+                }else if(playerTwoRowCounter == 3 || playerTwoColCounter == 3 ||playerTwoDiaCounter == 3 || playerTwoDiaOpCounter == 3){
+                    console.log("Player 2 is the winner");
+                    return;
                 }
 
         }
+        if (drawState){
+            console.log("draw")
+            }
     }
     return{getBoard, printBoard, pickSquare,checkWinner}
 
@@ -120,6 +135,7 @@ function gameController(
 
     let activePlayer = players[0];
     board = gameBoard();
+    
 
     const switchPlayerTurn = ()=>{
         if (activePlayer == players[0]) {
@@ -129,9 +145,13 @@ function gameController(
         };
     }
     const playRound = (row,column)=>{
-        board.pickSquare(row,column,activePlayer.value);
-        // switchPlayerTurn();
-        board.checkWinner();
+        if(board.pickSquare(row,column,activePlayer.value)){
+            switchPlayerTurn();
+            board.checkWinner();
+        }else{
+            console.log("space is occupied.")
+        }
+    
     }
     board.printBoard();
     return {board, playRound};
