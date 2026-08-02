@@ -22,8 +22,14 @@ function gameBoard() {
     const pickSquare = (row,column,player) =>{
         if(board[row][column].getValue() == ''){
             board[row][column].addChoice(player);
+            printBoard();
+            return 1;
         }
         printBoard();
+        return 0;
+
+
+
     }
     const checkWinner = () =>{
         let playerOneRowCounter;
@@ -97,18 +103,30 @@ function gameBoard() {
             }
                 if(playerOneRowCounter == 3 || playerOneColCounter == 3 ||  playerOneDiaCounter == 3|| playerOneDiaOpCounter ==3){
                     console.log("Player 1 is the winner");
-                    return;
+                    return "X";
                 }else if(playerTwoRowCounter == 3 || playerTwoColCounter == 3 ||playerTwoDiaCounter == 3 || playerTwoDiaOpCounter == 3){
                     console.log("Player 2 is the winner");
-                    return;
+                    return "O";
                 }
 
         }
         if (drawState){
             console.log("draw")
+            return "draw";
             }
     }
-    return{getBoard, printBoard, pickSquare,checkWinner}
+    const clearBoard = () =>{
+
+
+    for(let i = 0; i<rows; i++){
+        board[i] = [];
+        for(let j =0; j< columns; j++){
+            board[i].push(Cell());
+        }
+    
+    }
+    };
+    return{getBoard, printBoard, pickSquare,checkWinner, clearBoard}
 
 };
 function Cell(){
@@ -134,7 +152,9 @@ function gameController(
     }];
 
     let activePlayer = players[0];
-    board = gameBoard();
+    const board = gameBoard();
+    let gameOver;
+    let result;
     
 
     const switchPlayerTurn = ()=>{
@@ -145,16 +165,140 @@ function gameController(
         };
     }
     const playRound = (row,column)=>{
-        if(board.pickSquare(row,column,activePlayer.value)){
-            switchPlayerTurn();
-            board.checkWinner();
-        }else{
+        if(gameOver) return;
+        if(!board.pickSquare(row,column,activePlayer.value)){
             console.log("space is occupied.")
+            return;
         }
-    
+        result = board.checkWinner();
+        if(result){
+            gameOver = true;
+            return;
+        }
+        switchPlayerTurn();
     }
-    board.printBoard();
-    return {board, playRound};
+    const restartGame= ()=>{
+        board.clearBoard();
+        gameOver = false;
+        activePlayer = players[0];
+    }
+    // board.printBoard();
+    const getBoard = ()=> board.getBoard();
+    const getWinner = () => board.checkWinner();
+    return {playRound,restartGame,getBoard,getWinner};
 };
 
-game= gameController();
+
+const mainApp = (()=>{
+
+    const body = document.querySelector("body");
+
+    const container = document.createElement("div");
+
+    const tictactoe = document.createElement("div");
+    const restartBtn = document.createElement("button");
+    const result = document.createElement("div");    
+
+    const playersDiv = document.createElement("div");
+    const player1Div = document.createElement("div");
+    const player2Div = document.createElement("div");
+
+    const player1 = document.createElement("input");
+    const player2 = document.createElement("input");
+    const player1Label = document.createElement("label");
+    const player2Label = document.createElement("label");
+    player1Label.textContent = "Player 1"
+    player2Label.textContent = "Player 2"
+
+    const game= gameController(player1.value || "Player one"
+        ,player2.value|| "player two");
+    const myboard = game.getBoard();
+
+
+    player1.setAttribute("type", "text");
+    player1.setAttribute("id", "playerOne");
+    player1Label.setAttribute("for", "playerOne");
+
+    player2.setAttribute("type", "text");
+    player2.setAttribute("id", "playerTwo");
+    player2Label.setAttribute("for", "playerTwo");
+    
+    restartBtn.textContent = "New Game / Restart";
+    result.classList.add("result");
+    tictactoe.classList.add("tictactoe");
+    restartBtn.classList.add("restart-btn");
+    container.classList.add("container");
+
+    result.textContent = "New Game please input players 1 and 2 names.";
+
+    player1Div.classList.add("player1Div");
+    player2Div.classList.add("player2Div");
+
+    playersDiv.classList.add("playersDiv");
+
+
+    player1Div.appendChild(player1Label);
+    player1Div.appendChild(player1);
+
+    player2Div.appendChild(player2Label);
+    player2Div.appendChild(player2);
+
+    playersDiv.appendChild(player1Div);
+    playersDiv.appendChild(player2Div);
+
+    container.appendChild(result);
+    container.appendChild(tictactoe);
+    container.appendChild(restartBtn);
+    container.appendChild(playersDiv);
+
+
+
+        restartBtn.addEventListener("click", () =>{
+            game.restartGame();
+            tictactoe.querySelectorAll(".cell").forEach((cell)=>{
+                cell.textContent="";
+                result.textContent = "New Game";
+            });
+        });
+
+
+    for(let i =0; i < 3; i++){
+        for(let j =0 ; j < 3; j++){
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.addEventListener("click",() => {
+                if(player1.value == "" || player2.value == ""){
+                    result.textContent = "Please input players 1 and 2 names!"
+                    result.style.fontWeight="bolder"
+                    player1.focus();
+                    return;
+                }
+                game.playRound(i,j);
+                cell.textContent = myboard[i][j].getValue();
+                result.style.fontWeight="normal"
+                result.textContent = "New Game"
+
+                const winner = game.getWinner();
+                switch (winner){
+                    case "X":
+                    result.textContent = `${player1.value} is the Winner.`;
+                        break;
+                    case "O":
+                        result.textContent = `${player2.value} is the Winner`;
+                        break;
+                    case "draw":
+                        result.textContent = "Draw";
+                        return;
+                    default:
+                        break;
+
+                }
+            })
+
+            tictactoe.appendChild(cell);
+        }
+    }
+    body.appendChild(container);
+
+})();
+

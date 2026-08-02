@@ -1,0 +1,49 @@
+html,body{
+    height:100%;
+    margin:0;
+}
+body {
+  display: flex;
+  flex-direction: column;
+}
+.container{
+    display:flex;
+    justify-content:center;
+    align-items: center;
+    flex:1;
+    flex-direction: column;
+    gap:15px;
+}
+
+.tictactoe{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    width: min(400px, 80vw);
+    height: min(400px, 80vw);
+    gap: 4px;
+}
+.cell{
+    display:flex;
+    align-items:center;
+    justify-content: center;
+    background-color: blue;
+    font-size: 40px;
+    color:white;
+}
+.reset-btn{
+border-radius: 10px;
+}
+.result{
+
+}
+.playersDiv{
+    display:flex;
+    gap: 15px;
+}
+.player1Div,.player2Div{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
